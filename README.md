@@ -25,6 +25,7 @@ A command-line calculator in Java. Type a math expression, or plain-English phra
 - Implicit multiplication: `2pi`, `2(3 + 4)`, `(1 + 2)(3 + 4)`
 - `ans` reuses the last result: `6 * 7` then `ans + 1`
 - Implicit multiplication: `2pi`, `2(3 + 4)`, `(1 + 2)(3 + 4)`
+- Percent phrases: `20% of 50`, `15 percent of 80`
 
 ## Requirements
 
@@ -56,12 +57,13 @@ primary    := number | '(' expression ')' | name | name '(' expression ')'
 - Trig functions use **degrees**, not radians.
 - Numbers must be digits. Spelled-out numbers like "twelve" are not supported.
 - Function phrases grab one number or one parenthesized group: `square root of 16 plus 9` means `sqrt(16) + 9`. Use parentheses for `sqrt(16 + 9)`.
-- Floating-point rounding applies, so `sin(30)` prints `0.49999999999999994`.
+- Results are shown to 15 significant digits.
 - Implicit multiplication is evaluated left to right, so `10 / 2pi` means `(10 / 2) * pi`. Use parentheses for `10 / (2pi)`.
 - Scientific notation like `2e3` is not supported.
 - `ans` is only remembered during the current session.
 - Implicit multiplication is evaluated left to right, so `10 / 2pi` means `(10 / 2) * pi`. Use parentheses for `10 / (2pi)`.
 - Scientific notation like `2e3` is not supported.
+- Percentages only work in the form `X% of Y`. A bare `%` means modulo.
 
 ## Author
 

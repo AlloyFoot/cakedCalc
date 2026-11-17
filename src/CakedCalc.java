@@ -1,3 +1,5 @@
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.Scanner;
 
 public class CakedCalc {
@@ -24,6 +26,7 @@ public class CakedCalc {
         s = s.replaceAll("^(what is|what's|calculate|compute|solve)\\s+", "");
         s = s.replaceAll("^the\\s+", "");
         s = s.replace("?", "").replace("=", "");
+        s = s.replaceAll("(?<![a-z0-9.])([0-9]+\\.?[0-9]*|ans|\\([^()]*\\))\\s*(?:%|percent)\\s+of\\b", "($1 / 100) *");   // <-- new
 
         for (String[] f : WORD_FUNCTIONS) {
             s = s.replaceAll("\\b" + f[0] + "\\s+(-?[0-9.]+|pi|e|ans|\\([^()]*\\))(?![a-z0-9.])", f[1] + "($1)");
@@ -173,8 +176,9 @@ public class CakedCalc {
     }
 
     private static String format(double d) {
+        if (Double.isNaN(d) || Double.isInfinite(d)) return String.valueOf(d);
         if (d == Math.rint(d) && Math.abs(d) < 1e15) return String.valueOf((long) d);
-        return String.valueOf(d);
+        return new BigDecimal(d).round(new MathContext(15)).stripTrailingZeros().toPlainString();
     }
 
     public static void main(String[] args) {

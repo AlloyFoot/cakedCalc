@@ -116,6 +116,24 @@ public class Tests {
         checkError("ans / 0", "Division by zero");
         check("ans", 25);   // the failed calculation must not overwrite ans
 
+        // Percent phrases
+        check("20% of 50", 10);
+        check("20 percent of 50", 10);
+        check("20 % of 50", 10);
+        check("12.5% of 200", 25);
+        check("150% of 40", 60);
+        check("50 + 10% of 50", 55);
+        check("100 - 20% of 100", 80);
+        check("(10 + 10)% of 50", 10);
+        check("what is 15% of 80?", 12);
+        check("10% of 50 + 5", 10);
+        check("-20% of 50", -10);
+        check("50-20% of 50", 40);
+        check("20% of 50% of 100", 10);
+        check("200", 200);
+        check("10% of ans", 20);
+        check("ans% of 50", 10);
+
         // Errors
         checkError("5 / 0", "Division by zero");
         checkError("5 % 0", "Modulo by zero");
@@ -127,6 +145,8 @@ public class Tests {
         checkError("foo", "Unknown name");
         checkError("2 3", "Unexpected");
         checkError("2(", "Expected a number");
+        checkError("20% of", "Expected a number");
+        checkError("% of 50", "Expected a number");
 
         System.out.println();
         System.out.println(passed + " passed, " + failed + " failed");
