@@ -103,6 +103,19 @@ public class Tests {
         check("sin(30)cos(60)", 0.25);
         check("2 * 3pi", 6 * Math.PI);
 
+        // ans (each result becomes the next "ans", so order matters)
+        check("6 * 7", 42);
+        check("ans + 1", 43);
+        check("ans * 2", 86);
+        check("2ans", 172);
+        check("ans", 172);
+        check("100", 100);
+        check("ANS / 4", 25);
+        check("square root of ans", 5);
+        check("ans ^ 2", 25);
+        checkError("ans / 0", "Division by zero");
+        check("ans", 25);   // the failed calculation must not overwrite ans
+
         // Errors
         checkError("5 / 0", "Division by zero");
         checkError("5 % 0", "Modulo by zero");

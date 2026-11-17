@@ -4,6 +4,7 @@ public class CakedCalc {
 
     private final String src;
     private int pos = 0;
+    private static double lastAnswer = 0;
     private static final String[][] WORD_FUNCTIONS = {
         {"square root of", "sqrt"},
         {"absolute value of", "abs"},
@@ -18,14 +19,14 @@ public class CakedCalc {
         this.src = src;
     }
 
-    private static String normalize(String s) {
+        private static String normalize(String s) {
         s = s.toLowerCase().trim();
         s = s.replaceAll("^(what is|what's|calculate|compute|solve)\\s+", "");
         s = s.replaceAll("^the\\s+", "");
         s = s.replace("?", "").replace("=", "");
 
         for (String[] f : WORD_FUNCTIONS) {
-            s = s.replaceAll("\\b" + f[0] + "\\s+(-?[0-9.]+|pi|e|\\([^()]*\\))(?![a-z0-9.])", f[1] + "($1)");
+            s = s.replaceAll("\\b" + f[0] + "\\s+(-?[0-9.]+|pi|e|ans|\\([^()]*\\))(?![a-z0-9.])", f[1] + "($1)");
         }
         s = s.replaceAll("\\bplus\\b", "+");
         s = s.replaceAll("\\bminus\\b", "-");
@@ -44,6 +45,9 @@ public class CakedCalc {
         c.skipSpaces();
         if (c.pos < c.src.length()) {
             throw new IllegalArgumentException("Unexpected '" + c.src.charAt(c.pos) + "' at position " + c.pos);
+        }
+        if (!Double.isNaN(result) && !Double.isInfinite(result)) {
+            lastAnswer = result;
         }
         return result;
     }
@@ -111,6 +115,7 @@ public class CakedCalc {
 
             if (name.equals("pi")) return Math.PI;
             if (name.equals("e")) return Math.E;
+            if (name.equals("ans")) return lastAnswer;
 
             if (!match('(')) throw new IllegalArgumentException("Unknown name: " + name);
             double arg = parseExpression();
@@ -134,9 +139,9 @@ public class CakedCalc {
             case "sin": return Math.sin(Math.toRadians(arg));
             case "cos": return Math.cos(Math.toRadians(arg));
             case "tan": return Math.tan(Math.toRadians(arg));
-            case "asin": return Math.asin(Math.toRadians(arg));
-            case "acos": return Math.acos(Math.toRadians(arg));
-            case "atan": return Math.atan(Math.toRadians(arg));
+            case "asin": return Math.toDegrees(Math.asin(arg));
+            case "acos": return Math.toDegrees(Math.acos(arg));
+            case "atan": return Math.toDegrees(Math.atan(arg));
             case "sqrt": return Math.sqrt(arg);
             case "log": return Math.log10(arg);
             case "ln": return Math.log(arg);

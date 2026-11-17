@@ -22,6 +22,7 @@ A command-line calculator in Java. Type a math expression, or plain-English phra
 - Plain-English input: `plus`, `minus`, `times`, `divided by`, `mod`, `squared`, `cubed`, `to the power of`
 - Function phrases: `square root of 16`, `absolute value of -5`, `sine of 30`
 - Readable error messages instead of crashes
+- Implicit multiplication: `2pi`, `2(3 + 4)`, `(1 + 2)(3 + 4)`
 
 ## Requirements
 
@@ -54,6 +55,8 @@ primary    := number | '(' expression ')' | name | name '(' expression ')'
 - Numbers must be digits. Spelled-out numbers like "twelve" are not supported.
 - Function phrases grab one number or one parenthesized group: `square root of 16 plus 9` means `sqrt(16) + 9`. Use parentheses for `sqrt(16 + 9)`.
 - Floating-point rounding applies, so `sin(30)` prints `0.49999999999999994`.
+- Implicit multiplication is evaluated left to right, so `10 / 2pi` means `(10 / 2) * pi`. Use parentheses for `10 / (2pi)`.
+- Scientific notation like `2e3` is not supported.
 
 ## Author
 
