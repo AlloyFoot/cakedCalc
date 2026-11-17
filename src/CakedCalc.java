@@ -29,16 +29,16 @@ public class CakedCalc {
     }
 
     private double parseTerm() {
-        double value = parsePrimary();
+        double value = parseUnary();
         while (true) {
             if (match('*')) {
-                value *= parsePrimary();
+                value *= parseUnary();
             } else if (match('/')) {
-                double d = parsePrimary();
+                double d = parseUnary();
                 if (d == 0) throw new ArithmeticException("Division by zero");
                 value /= d;
             } else if (match('%')) {
-                double d = parsePrimary();
+                double d = parseUnary();
                 if (d == 0) throw new ArithmeticException("Modulo by zero");
                 value %= d;
             } else {
@@ -47,7 +47,21 @@ public class CakedCalc {
         }
     }
 
+    private double parseUnary() {
+        if (match('+')) return parseUnary();
+        if (match('-')) return -parseUnary();
+        return parsePrimary();
+    }
+
     private double parsePrimary() {
+        if (match('(')) {
+            double value = parseExpression();
+            if (!match(')')) {
+                throw new IllegalArgumentException("Expected ')' at position " + pos);
+            }
+            return value;
+        }
+
         skipSpaces();
         int start = pos;
         while (pos < src.length()
