@@ -4,13 +4,42 @@ public class CakedCalc {
 
     private final String src;
     private int pos = 0;
+    private static final String[][] WORD_FUNCTIONS = {
+        {"square root of", "sqrt"},
+        {"absolute value of", "abs"},
+        {"sine of", "sin"},
+        {"cosine of", "cos"},
+        {"tangent of", "tan"},
+        {"natural log of", "ln"},
+        {"log of", "log"},
+    };
 
     private CakedCalc(String src) {
         this.src = src;
     }
 
+    private static String normalize(String s) {
+        s = s.toLowerCase().trim();
+        s = s.replaceAll("^(what is|what's|calculate|compute|solve)\\s+", "");
+        s = s.replaceAll("^the\\s+", "");
+        s = s.replace("?", "").replace("=", "");
+
+        for (String[] f : WORD_FUNCTIONS) {
+            s = s.replaceAll("\\b" + f[0] + "\\s+(-?[0-9.]+|pi|e|\\([^()]*\\))(?![a-z0-9.])", f[1] + "($1)");
+        }
+        s = s.replaceAll("\\bplus\\b", "+");
+        s = s.replaceAll("\\bminus\\b", "-");
+        s = s.replaceAll("\\b(times|multiplied by)\\b", "*");
+        s = s.replaceAll("\\bdivided by\\b", "/");
+        s = s.replaceAll("\\bto the power of\\b", "^");
+        s = s.replaceAll("\\b(mod|modulo)\\b", "%");
+        s = s.replaceAll("\\bsquared\\b", "^2");
+        s = s.replaceAll("\\bcubed\\b", "^3");
+        return s;
+    }
+
     public static double calculate(String input) {
-        CakedCalc c = new CakedCalc(input);
+        CakedCalc c = new CakedCalc(normalize(input));
         double result = c.parseExpression();
         c.skipSpaces();
         if (c.pos < c.src.length()) {
