@@ -70,6 +70,8 @@ public class CakedCalc {
                 double d = parseUnary();
                 if (d == 0) throw new ArithmeticException("Modulo by zero");
                 value %= d;
+            } else if (startsImplicitFactor()) {
+                value *= parseUnary();
             } else {
                 return value;
             }
@@ -155,6 +157,13 @@ public class CakedCalc {
             return true;
         }
         return false;
+    }
+
+    private boolean startsImplicitFactor() {
+        skipSpaces();
+        if (pos >= src.length()) return false;
+        char c = src.charAt(pos);
+        return c == '(' || Character.isLetter(c);
     }
 
     private static String format(double d) {

@@ -90,6 +90,19 @@ public class Tests {
         check("natural log of e", 1);
         check("the square root of (16 + 9)", 5);
 
+        // Implicit multiplication
+        check("2pi", 2 * Math.PI);
+        check("2 pi", 2 * Math.PI);
+        check("-2pi", -2 * Math.PI);
+        check("2e", 2 * Math.E);
+        check("2(3 + 4)", 14);
+        check("(1 + 2)(3 + 4)", 21);
+        check("2(3)(4)", 24);
+        check("2sqrt(16)", 8);
+        check("3 sqrt(16)", 12);
+        check("sin(30)cos(60)", 0.25);
+        check("2 * 3pi", 6 * Math.PI);
+
         // Errors
         checkError("5 / 0", "Division by zero");
         checkError("5 % 0", "Modulo by zero");
@@ -99,6 +112,8 @@ public class Tests {
         checkError("2 + 3 )", "Unexpected");
         checkError("foo(2)", "Unknown function");
         checkError("foo", "Unknown name");
+        checkError("2 3", "Unexpected");
+        checkError("2(", "Expected a number");
 
         System.out.println();
         System.out.println(passed + " passed, " + failed + " failed");
