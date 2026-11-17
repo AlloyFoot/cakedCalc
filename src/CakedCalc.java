@@ -50,7 +50,16 @@ public class CakedCalc {
     private double parseUnary() {
         if (match('+')) return parseUnary();
         if (match('-')) return -parseUnary();
-        return parsePrimary();
+        return parsePower();
+    }
+
+    private double parsePower() {
+        double base = parsePrimary();
+        if (match('^')) {
+            double exponent = parseUnary();
+            base = Math.pow(base, exponent);
+        }
+        return base;
     }
 
     private double parsePrimary() {
@@ -63,6 +72,21 @@ public class CakedCalc {
         }
 
         skipSpaces();
+
+        if (pos < src.length() && Character.isLetter(src.charAt(pos))) {
+            int start = pos;
+            while (pos < src.length() && Character.isLetter(src.charAt(pos))) pos++;
+            String name = src.substring(start, pos).toLowerCase();
+
+            if (name.equals("pi")) return Math.PI;
+            if (name.equals("e")) return Math.E;
+
+            if (!match('(')) throw new IllegalArgumentException("Unknown name: " + name);
+            double arg = parseExpression();
+            if (!match(')')) throw new IllegalArgumentException("Missing closing parenthesis after " + name);
+            return applyFunction(name, arg);
+        }
+
         int start = pos;
         while (pos < src.length()
                 && (Character.isDigit(src.charAt(pos)) || src.charAt(pos) == '.')) {
@@ -72,6 +96,22 @@ public class CakedCalc {
             throw new IllegalArgumentException("Expected a number at position " + pos);
         }
         return Double.parseDouble(src.substring(start, pos));
+    }
+
+    private double applyFunction(String name, double arg) {
+        switch (name) {
+            case "sin": return Math.sin(Math.toRadians(arg));
+            case "cos": return Math.cos(Math.toRadians(arg));
+            case "tan": return Math.tan(Math.toRadians(arg));
+            case "asin": return Math.asin(Math.toRadians(arg));
+            case "acos": return Math.acos(Math.toRadians(arg));
+            case "atan": return Math.atan(Math.toRadians(arg));
+            case "sqrt": return Math.sqrt(arg);
+            case "log": return Math.log10(arg);
+            case "ln": return Math.log(arg);
+            case "exp": return Math.exp(arg);
+            default: throw new IllegalArgumentException("Unknown function: " + name);
+        }
     }
 
     private void skipSpaces() {
