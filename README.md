@@ -57,4 +57,4 @@ primary    := number | '(' expression ')' | name | name '(' expression ')'
 
 ## Author
 
-Made by YOUR NAME for Hack Club.
+Made by Ved Patel for Hack Club.
