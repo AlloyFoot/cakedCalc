@@ -147,6 +147,7 @@ public class CakedCalc {
             case "ln": return Math.log(arg);
             case "exp": return Math.exp(arg);
             case "abs": return Math.abs(arg);
+            case "round": return Math.round(arg);
             default: throw new IllegalArgumentException("Unknown function: " + name);
         }
     }
