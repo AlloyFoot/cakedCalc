@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>cakedCalc</title>
+<meta name="description" content="A Java command-line calculator that understands plain English, running in your browser.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cjrtnc.leaningtech.com/5.0/loader.js"></script>
+<style>
+  :root {
+    --bg: #f6f3ee;
+    --text: #2a2622;
+    --muted: #6f675e;
+    --term-bg: #1f1b18;
+    --term-text: #ece4d8;
+    --term-dim: #9a8f82;
+    --accent: #e0789a;
+    --accent-ink: #b8466c;
+    --err: #ff8f7a;
+    --chip-bg: #ffffff;
+    --chip-border: #ddd5ca;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #151210;
+      --text: #ece4d8;
+      --muted: #a39789;
+      --term-bg: #0d0b0a;
+      --accent-ink: #f09ab6;
+      --chip-bg: #221d1a;
+      --chip-border: #3a332d;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 48px 16px 64px; }
+  h1 { font: 600 2.2rem/1.1 "JetBrains Mono", monospace; margin: 0 0 8px; }
+  h1 span { color: var(--accent-ink); }
+  .lede { color: var(--muted); margin: 0 0 24px; }
+  .term {
+    background: var(--term-bg);
+    color: var(--term-text);
+    border-radius: 12px;
+    padding: 16px;
+    font: 14px/1.55 "JetBrains Mono", ui-monospace, monospace;
+    height: 420px;
+    overflow-y: auto;
+    cursor: text;
+    box-shadow: 0 10px 30px rgba(0,0,0,.18);
+  }
+  .term pre { margin: 0; white-space: pre-wrap; word-break: break-word; font: inherit; }
+  .term .in { color: var(--accent); }
+  .term .err { color: var(--err); }
+  .term .dim { color: var(--term-dim); }
+  .line { display: flex; gap: 0; }
+  .line input {
+    flex: 1; min-width: 0;
+    background: transparent; border: 0; outline: 0;
+    color: var(--accent); font: inherit; caret-color: var(--accent);
+    padding: 0;
+  }
+  .line input:disabled { opacity: .5; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 28px; }
+  .chips button {
+    font: 13px "JetBrains Mono", monospace;
+    background: var(--chip-bg); color: var(--text);
+    border: 1px solid var(--chip-border); border-radius: 999px;
+    padding: 6px 12px; cursor: pointer;
+  }
+  .chips button:hover { border-color: var(--accent); }
+  .chips button:disabled { opacity: .5; cursor: default; }
+  @media (max-width: 520px) {
+    main { padding-top: 32px; }
+    .term { font-size: 12px; height: 380px; padding: 12px; }
+  }
+  footer { color: var(--muted); font-size: 14px; }
+  footer a { color: var(--accent-ink); }
+</style>
+</head>
+<body>
+<main>
+  <h1>caked<span>Calc</span></h1>
+  <p class="lede">A Java command-line calculator that understands plain English. This is the real Java program running in your browser. Type an expression, or <code>help</code> to see everything it understands.</p>
+
+  <div class="term" id="term">
+    <pre id="log"><span class="dim">Starting Java in your browser… the first load can take a minute.</span>
+</pre>
+    <div class="line"><pre id="prompt"></pre><input id="input" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Calculator input" disabled></div>
+  </div>
+
+  <div class="chips" id="chips">
+    <button disabled>what is 12 plus 8 times 2</button>
+    <button disabled>square root of 16</button>
+    <button disabled>20% of 50</button>
+    <button disabled>2pi</button>
+    <button disabled>ans * 2</button>
+    <button disabled>sin(30)</button>
+    <button disabled>5 / 0</button>
+    <button disabled>history</button>
+    <button disabled>help</button>
+  </div>
+
+  <footer>Source on <a href="https://github.com/AlloyFoot/cakedCalc">GitHub</a>. Runs with <a href="https://cheerpj.com/">CheerpJ</a>.</footer>
+</main>
+
+<script>
+  const term = document.getElementById("term");
+  const log = document.getElementById("log");
+  const promptEl = document.getElementById("prompt");
+  const input = document.getElementById("input");
+  const chips = document.querySelectorAll("#chips button");
+
+  let bridge = null;
+  let lines = [];      // every line typed this session, replayed through main()
+  let shown = "";      // how much of main()'s output is already on screen
+  let busy = false;
+  const past = [];     // for the up/down arrow keys
+  let pastIndex = 0;
+
+  function add(text, cls) {
+    const span = document.createElement("span");
+    if (cls) span.className = cls;
+    span.textContent = text;
+    log.appendChild(span);
+  }
+
+  function scrollDown() { term.scrollTop = term.scrollHeight; }
+
+  // Output always ends with the "> " prompt main() prints before waiting for input.
+  function showNew(full) {
+    let fresh = full.slice(shown.length);
+    shown = full;
+    let prompt = "";
+    if (fresh.endsWith("> ")) { prompt = "> "; fresh = fresh.slice(0, -2); }
+    for (const part of fresh.split(/(^Error: .*$)/m)) {
+      if (part) add(part, part.startsWith("Error: ") ? "err" : "");
+    }
+    promptEl.textContent = prompt;
+  }
+
+  // Lines typed while Java is still answering wait their turn here.
+  const queue = [];
+  function run(line) {
+    line = line.trim();
+    if (!bridge || !line) return;
+    input.value = "";
+    queue.push(line);
+    if (!busy) drain();
+  }
+
+  async function drain() {
+    busy = true;
+    while (queue.length) await runOne(queue.shift());
+    busy = false;
+  }
+
+  async function runOne(line) {
+    add(promptEl.textContent);
+    add(line + "\n", "in");
+    promptEl.textContent = "";
+    past.push(line); pastIndex = past.length;
+
+    if (line.toLowerCase() === "quit") {
+      add("Bye! Starting a fresh session.\n", "dim");
+      lines = []; shown = "";
+      showNew(await bridge.run(""));
+    } else {
+      lines.push(line);
+      showNew(await bridge.run(lines.join("\n") + "\n"));
+    }
+    scrollDown();
+    input.focus();
+  }
+
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); run(input.value); }
+    else if (e.key === "ArrowUp" && pastIndex > 0) { e.preventDefault(); input.value = past[--pastIndex]; }
+    else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      pastIndex = Math.min(past.length, pastIndex + 1);
+      input.value = past[pastIndex] || "";
+    }
+  });
+  term.addEventListener("click", () => { if (!window.getSelection().toString()) input.focus(); });
+  chips.forEach((b) => b.addEventListener("click", () => run(b.textContent)));
+
+  (async () => {
+    try {
+      await cheerpjInit({ version: 17, status: "none" });
+      const dir = location.pathname.replace(/[^/]*$/, "");
+      const lib = await cheerpjRunLibrary("/app" + dir + "cakedcalc.jar");
+      bridge = await lib.DemoBridge;
+      log.textContent = "";
+      showNew(await bridge.run(""));
+      input.disabled = false;
+      chips.forEach((b) => (b.disabled = false));
+      input.focus();
+    } catch (err) {
+      log.textContent = "";
+      add("Couldn't start Java in this browser: " + (err && err.message ? err.message : err) + "\n", "err");
+    }
+  })();
+</script>
+</body>
+</html>

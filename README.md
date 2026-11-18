@@ -2,6 +2,8 @@
 
 A command-line calculator in Java. Type a math expression, or plain-English phrasing, and get the answer.
 
+**Try it in your browser:** https://alloyfoot.github.io/cakedCalc/
+
 ```
 > 2 + 3 * 4
 14
@@ -71,3 +73,12 @@ primary    := number | '(' expression ')' | name | name '(' expression ')'
 ## Author
 
 Made by Ved Patel for Hack Club.
+## Web demo
+
+The [web demo](https://alloyfoot.github.io/cakedCalc/) runs the real Java program in the browser using [CheerpJ](https://cheerpj.com/). GitHub Pages serves it from the `docs` folder. `demo/DemoBridge.java` feeds typed lines into `main()`, because browsers can't type into `System.in`.
+
+After changing `CakedCalc.java`, rebuild the demo's jar from the project root:
+
+```
+sh demo/build.sh
+```
