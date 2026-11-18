@@ -38,6 +38,9 @@ javac src/CakedCalc.java
 java -cp src CakedCalc
 ```
 
+Type `help` to list every operator, phrase, function and command.
+Type `history` to show this session's calculations, numbered.
+Type `clear` to clear the history and reset `ans` to 0.
 Type `quit` to exit.
 
 ## How it works

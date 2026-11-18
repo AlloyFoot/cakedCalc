@@ -1,5 +1,7 @@
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class CakedCalc {
@@ -181,9 +183,59 @@ public class CakedCalc {
         return new BigDecimal(d).round(new MathContext(15)).stripTrailingZeros().toPlainString();
     }
 
-    public static void main(String[] args) {
+    static void clearAnswer() {
+        lastAnswer = 0;
+    }
+
+    private static void printHelp() {
+          System.out.print("""
+            CakedCalc understands:
+
+            Operators
+              +  -  *  /       add, subtract, multiply, divide
+              %                remainder (mod), e.g. 10 % 3 = 1
+              ^                power, e.g. 2 ^ 10
+              ( )              parentheses, e.g. (2 + 3) * 4
+              2pi, 2(3 + 4)    implicit multiplication
+
+            Plain English
+              what is, what's, calculate, compute, solve   (optional, at the start)
+              plus, minus, times, multiplied by, divided by
+              to the power of, mod, modulo, squared, cubed
+              X% of Y, X percent of Y                      e.g. 20% of 50
+              square root of, absolute value of, sine of, cosine of,
+              tangent of, log of, natural log of           e.g. square root of 16
+
+            Functions (trig uses degrees, not radians)
+              sqrt  abs  round  exp
+              sin  cos  tan  asin  acos  atan
+              log (base 10)  ln (natural log)
+
+            Constants
+              pi, e, ans (your last answer)
+
+            Commands
+              help      show this list
+              history   show this session's calculations
+              clear     clear history and reset ans to 0
+              quit      exit
+            """);
+    }
+
+    private static void printHistory(List<String> history) {
+        if (history.isEmpty()) {
+            System.out.println("No calculations yet. Try typing an expression, e.g. '2 + 3 * 4'");
+            return;
+        }
+        for (int i = 0; i < history.size(); i++) {
+            System.out.println((i + 1) + ": " + history.get(i));
+        }
+    }
+
+        public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        System.out.println("This is the cakedCalc. Type an expression, or 'quit' to exit.");
+        List<String> history = new ArrayList<>();
+        System.out.println("This is the cakedCalc. Type an expression, 'help' for a list of commands, or 'quit' to exit.");
 
         while (true) {
             System.out.print("> ");
@@ -193,8 +245,28 @@ public class CakedCalc {
             if (line.isEmpty()) continue;
             if (line.equalsIgnoreCase("quit")) break;
 
+            if (line.equalsIgnoreCase("help")) {
+                printHelp();
+                continue;
+            }
+            if (line.equalsIgnoreCase("history")) {
+                printHistory(history);
+                continue;
+            }
+            if (line.equalsIgnoreCase("clear")) {
+                history.clear();
+                clearAnswer();
+                System.out.println("History cleared and ans reset to 0.");
+                continue;
+            }
+
             try {
-                System.out.println(format(calculate(line)));
+                double result = calculate(line);
+                String shown = format(result);
+                System.out.println(shown);
+                if (!Double.isNaN(result) && !Double.isInfinite(result)) {
+                    history.add(line + " = " + shown);
+                }
             } catch (Exception ex) {
                 System.out.println("Error: " + ex.getMessage());
             }

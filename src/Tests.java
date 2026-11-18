@@ -134,6 +134,11 @@ public class Tests {
         check("10% of ans", 20);
         check("ans% of 50", 10);
 
+        // clear resets ans to 0
+        check("42", 42);
+        CakedCalc.clearAnswer();
+        check("ans", 0);
+
         // Errors
         checkError("5 / 0", "Division by zero");
         checkError("5 % 0", "Modulo by zero");
@@ -147,6 +152,9 @@ public class Tests {
         checkError("2(", "Expected a number");
         checkError("20% of", "Expected a number");
         checkError("% of 50", "Expected a number");
+        checkError("help", "Unknown name");
+        checkError("history", "Unknown name");
+        checkError("clear", "Unknown name");
 
         System.out.println();
         System.out.println(passed + " passed, " + failed + " failed");
